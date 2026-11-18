@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIR QUALITY - GenAI Winter Smog & Community Resilience Co-Pilot</title>
+  
+  <!-- Modern Tailwind CSS via CDN (gracefully cascades to styles.css if offline) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    code, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= TOP STICKY NAVBAR ================= -->
+  <header class="sticky top-0 z-40 glass-header border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Name -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <span class="text-xl">🌬️</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-black tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
+              AIR QUALITY
+            </span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-500/40">
+              GenAI v2.4
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Winter Smog & Community Resilience Co-Pilot</p>
+        </div>
+      </div>
+
+      <!-- Controls: Location Selector & AQI Pill -->
+      <div class="flex items-center gap-3">
+        
+        <!-- City Selector -->
+        <div class="relative">
+          <select id="city-selector" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none pr-8 cursor-pointer font-medium shadow-sm">
+            <option value="delhi">🇮🇳 Delhi NCR, India (Severe Inversion)</option>
+            <option value="lahore">🇵🇰 Lahore, Pakistan (Hazardous Fog)</option>
+            <option value="beijing">🇨🇳 Beijing-Hebei, China (Cold Trap)</option>
+            <option value="saltlake">🇺🇸 Salt Lake City, USA (Basin Inversion)</option>
+            <option value="centralvalley">🇺🇸 Central Valley, USA (Tule Fog)</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400 text-xs">
+            ▼
+          </div>
+        </div>
+
+        <!-- Live AQI Status Pill -->
+        <div id="header-aqi-pill" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-rose-950/60 text-rose-300 border border-rose-500/40 shadow-sm">
+          <span class="w-2 h-2 rounded-full animate-ping bg-current"></span>
+          AQI 385 • Severe
+        </div>
+
+        <!-- Settings / API Key Button -->
+        <button id="btn-open-api-modal" title="Configure GenAI Engine & Gemini API Key" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition shadow-sm">
+          <span class="text-sm">⚙️</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Sub-bar: Navigation Tabs -->
+    <div class="border-t border-slate-800/60 bg-slate-950/60 overflow-x-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 py-2">
+        <button data-tab="dashboard" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm transition flex items-center gap-2">
+          <span>📊</span> Overview & Atmospheric Shield
+        </button>
+        <button data-tab="routine" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2">
+          <span>🗓️</span> Low-Emission Daily Routine
+        </button>
+        <button data-tab="iaq-hacks" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2">
+          <span>🛠️</span> IAQ Hacks & DIY Purifier Lab
+        </button>
+        <button data-tab="alternatives" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2">
+          <span>🌱</span> Sustainable Alternatives & Impact
+        </button>
+        <button data-tab="ai-assistant" class="nav-tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition flex items-center gap-2">
+          <span>✨</span> AIR QUALITY GenAI Co-Pilot
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Active Profile Selector Banner -->
+    <section class="glass-panel p-4 bg-slate-900/60 border border-slate-800 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg">
+          🛡️
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Family Vulnerability Context</div>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-sm font-bold text-slate-200">Personalized Risk Profile:</span>
+            <div class="relative inline-block">
+              <select id="profile-selector" class="bg-slate-950 border border-slate-700 text-xs text-emerald-400 font-semibold rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                <option value="child_asthma">👶 Child / Asthmatic Member (High Vulnerability)</option>
+                <option value="elderly_cardiac">🫀 Elderly / Cardiovascular (Inversion Risk)</option>
+                <option value="active_commuter">🚗 Daily Urban Commuter (Exhaust Corridors)</option>
+                <option value="general_family">🏡 General Household & Healthy Adults</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Vulnerability Chips -->
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <button data-profile="child_asthma" class="profile-chip-btn px-2.5 py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/60 transition">
+          Child / Asthma
+        </button>
+        <button data-profile="elderly_cardiac" class="profile-chip-btn px-2.5 py-1 rounded-lg bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border border-amber-800/60 transition">
+          Elderly / Heart
+        </button>
+        <button data-profile="active_commuter" class="profile-chip-btn px-2.5 py-1 rounded-lg bg-sky-950/40 hover:bg-sky-900/50 text-sky-300 border border-sky-800/60 transition">
+          Commuter
+        </button>
+        <button data-profile="general_family" class="profile-chip-btn px-2.5 py-1 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-800/60 transition">
+          General
+        </button>
+      </div>
+    </section>
+
+    <!-- Dynamic Profile Vulnerability Alert -->
+    <div id="profile-vulnerability-alert"></div>
+
+
+    <!-- ================= TAB 1: OVERVIEW & ATMOSPHERIC SHIELD ================= -->
+    <div id="tab-pane-dashboard" class="tab-pane space-y-6">
+      
+      <!-- Top Grid: Hero AQI Gauge + Diurnal Inversion Curve -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left: Live Atmospheric Card -->
+        <div class="glass-panel p-6 bg-slate-900/70 border border-slate-800 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full aqi-radial-hazard pointer-events-none"></div>
+
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-400 font-semibold mb-2">
+              <span>REAL-TIME AIR TELEMETRY</span>
+              <span class="flex items-center gap-1 text-emerald-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live Sensors
+              </span>
+            </div>
+
+            <div class="my-4 text-center">
+              <div class="text-6xl font-black tracking-tight text-white flex items-baseline justify-center gap-2">
+                <span id="hero-aqi-value">385</span>
+                <span class="text-sm font-semibold text-slate-400 font-mono">AQI</span>
+              </div>
+              <div id="hero-aqi-category" class="text-base font-bold text-rose-400 mt-1">Severe / Hazardous</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 text-xs">
+              <div>
+                <span class="text-slate-400">PM2.5 Concentration:</span>
+                <div id="hero-pm25-value" class="text-sm font-bold text-slate-200 mt-0.5">320 µg/m³</div>
+              </div>
+              <div>
+                <span class="text-slate-400">Weather & Wind:</span>
+                <div id="hero-temp-wind" class="text-sm font-bold text-slate-200 mt-0.5">13°C • 3.2 km/h</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-slate-800/80 space-y-2 text-xs">
+            <div class="flex items-start gap-2 text-amber-300">
+              <span class="text-base mt-0.5">⚠️</span>
+              <div>
+                <span class="font-bold">Inversion State:</span>
+                <div id="hero-inversion-text" class="text-slate-300 text-[11px] mt-0.5">Active Severe Ground Inversion (04:00 - 10:30)</div>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-400">
+              <strong>Dominant Sources:</strong> <span id="hero-sources-text">Stubble burning transport, cold-start vehicular idling, biomass heating.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 2 Cols: Diurnal Exposure Danger Clock -->
+        <div class="glass-panel p-6 bg-slate-900/70 border border-slate-800 lg:col-span-2 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <span>⏰</span> Diurnal Smog Exposure Clock
+              </h3>
+              <p class="text-xs text-slate-400">Predictive hourly ground particulate curve factoring solar boundary layer thermal expansion.</p>
+            </div>
+            <span class="text-xs font-mono text-cyan-400 font-semibold px-2.5 py-1 rounded bg-cyan-950/50 border border-cyan-800">24-Hour Inversion Model</span>
+          </div>
+
+          <div id="diurnal-timeline-container"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Grid: Profile Directives + Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Directives for active profile -->
+        <div class="glass-panel p-6 bg-slate-900/70 border border-slate-800 space-y-3">
+          <h4 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+            <span>📋</span> Tailored Medical & Environmental Directives
+          </h4>
+          <div id="profile-directives-list"></div>
+        </div>
+
+        <!-- Quick GenAI Prompt Starters -->
+        <div class="glass-panel p-6 bg-slate-900/70 border border-slate-800 space-y-3">
+          <h4 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+            <span>💡</span> Fast GenAI Actions for Severe Days
+          </h4>
+          <div class="grid grid-cols-1 gap-2 text-xs">
+            <button class="prompt-chip text-left p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 transition group" data-prompt="How do I optimize my family's routine during severe winter smog?">
+              <div class="font-semibold text-slate-200 group-hover:text-emerald-300 transition">📅 Dynamic Routine Optimization</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Rearrange outdoor chores into the midday solar convection clearing window.</p>
+            </button>
+            <button class="prompt-chip text-left p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 transition group" data-prompt="How can I build a cheap DIY air purifier that actually works?">
+              <div class="font-semibold text-slate-200 group-hover:text-cyan-300 transition">🛠️ DIY Corsi-Rosenthal Purifier Blueprint</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Build a 500+ CFM clean air purifier using a $20 box fan and MERV-13 filters.</p>
+            </button>
+            <button class="prompt-chip text-left p-3 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 transition group" data-prompt="My child has mild asthma. What specific precautions should we take?">
+              <div class="font-semibold text-slate-200 group-hover:text-rose-300 transition">👶 Pediatric & Asthma Defense Plan</div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Peak-flow monitoring, bedroom micro-sanctuary, and transit masks.</p>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= TAB 2: LOW-EMISSION ROUTINE PLANNER ================= -->
+    <div id="tab-pane-routine" class="tab-pane hidden space-y-6">
+      <div class="glass-panel p-6 bg-slate-900/70 border border-slate-800">
+        <div id="routine-planner-container"></div>
+      </div>
+    </div>
+
+
+    <!-- ================= TAB 3: IAQ HACKS & DIY PURIFIER LAB ================= -->
+    <div id="tab-pane-iaq-hacks" class="tab-pane hidden space-y-8">
+      
+      <!-- Interactive Corsi-Rosenthal / CADR Physics Architect -->
+      <div class="glass-panel p-6 bg-slate-900/80 border border-slate-800 space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+          <div>
+            <h3 class="font-bold text-white text-lg flex items-center gap-2">
+              <span>🌀</span> DIY Corsi-Rosenthal Purifier & Room CADR Architect
+            </h3>
+            <p class="text-xs text-slate-400">Calculate Clean Air Delivery Rate (CADR) and Air Changes per Hour (ACH) grounded in fluid dynamics.</p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-950 text-emerald-400 border border-emerald-500/50 self-start md:self-auto">
+            Physics Validated: ASHRAE 62.2 Standard
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Inputs Column (2 cols) -->
+          <div class="lg:col-span-2 space-y-4">
+            
+            <!-- Room Dimensions -->
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Room Length (ft)</label>
+                <input id="cadr-length" type="number" value="16" min="6" max="60" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Room Width (ft)</label>
+                <input id="cadr-width" type="number" value="14" min="6" max="60" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Ceiling Height (ft)</label>
+                <input id="cadr-height" type="number" value="9" min="7" max="25" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+              </div>
+            </div>
+
+            <!-- Filter Setup -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Filter Media Standard</label>
+                <select id="cadr-filter-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+                  <option value="merv13" selected>MERV-13 (Optimal: 85% PM2.5 + Low Drag)</option>
+                  <option value="merv14">MERV-14 (90% PM2.5 + Medium Drag)</option>
+                  <option value="merv11">MERV-11 (65% PM2.5 - Budget)</option>
+                  <option value="hepa13">True HEPA H13 (99.97% - High Resistance)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Number of Filters in Box Cube</label>
+                <select id="cadr-filter-count" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+                  <option value="4" selected>4 Filters (Cube C-R Box - Maximum Airflow)</option>
+                  <option value="2">2 Filters (V-Shape Wedge - Medium Space)</option>
+                  <option value="1">1 Filter (Single Flat Back - High Resistance)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Fan Selection & Shroud -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Fan Motor Model</label>
+                <select id="cadr-fan" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+                  <option value="box_20" selected>20" Standard Box Fan (55W / 52 dBA)</option>
+                  <option value="box_premium">High-Efficiency EC Motor Fan (38W / 46 dBA)</option>
+                  <option value="pc_fan_array">Ultra-Quiet 9x PC Fan Array (18W / 32 dBA)</option>
+                </select>
+              </div>
+
+              <!-- Cardboard Shroud Hack Toggle -->
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-semibold text-slate-200 flex items-center gap-1">
+                    Cardboard Shroud Attached? <span>✨</span>
+                  </div>
+                  <div class="text-[10px] text-emerald-400 font-medium">+38% Clean Air Delivery Gain!</div>
+                </div>
+                <label class="switch-toggle">
+                  <input id="cadr-shroud" type="checkbox" checked>
+                  <span class="slider-round"></span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Output Column (1 col) -->
+          <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800/80 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mb-2">PHYSICS ENGINE OUTPUT</div>
+
+              <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                  <span class="text-xs text-slate-400">Total Room Volume:</span>
+                  <span id="cadr-res-volume" class="text-xs font-mono font-bold text-slate-200">2,016 cu ft</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                  <span class="text-xs text-slate-400">Delivered CADR:</span>
+                  <span id="cadr-res-delivered" class="text-sm font-mono font-black text-cyan-400">512 CFM</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                  <div>
+                    <span class="text-xs text-slate-400 block">Air Changes / Hour:</span>
+                    <span class="text-[10px] text-slate-500">Target: ≥ 5.0 ACH</span>
+                  </div>
+                  <span id="cadr-res-ach" class="text-2xl font-black text-emerald-400">15.2 ACH</span>
+                </div>
+                <div class="flex items-center justify-between border-b border-slate-900 pb-2">
+                  <span class="text-xs text-slate-400">90% Clearance Time:</span>
+                  <span id="cadr-res-clearance" class="text-xs font-mono font-bold text-slate-200">9 mins</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-slate-400">Estimated Cost:</span>
+                  <span id="cadr-res-cost" class="text-xs font-bold text-emerald-400">$55 / ₹4,200</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="cadr-res-verdict" class="text-xs text-emerald-300 font-semibold p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-900">
+              <!-- Verdict rendered dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Proven IAQ Hacks Library -->
+      <div class="space-y-4">
+        <div>
+          <h3 class="font-bold text-white text-lg flex items-center gap-2">
+            <span>📚</span> Science-Backed Winter IAQ Hacks Library
+          </h3>
+          <p class="text-xs text-slate-400">Practical, zero-cost and low-cost building physics techniques to stop toxic smog infiltration.</p>
+        </div>
+
+        <div id="iaq-hacks-container"></div>
+      </div>
+
+    </div>
+
+
+    <!-- ================= TAB 4: SUSTAINABLE ALTERNATIVES & IMPACT LEDGER ================= -->
+    <div id="tab-pane-alternatives" class="tab-pane hidden space-y-6">
+      
+      <!-- Top Overview of Sustainable Alternatives -->
+      <div class="glass-panel p-6 bg-slate-900/80 border border-slate-800 space-y-6">
+        <div>
+          <h3 class="font-bold text-white text-lg flex items-center gap-2">
+            <span>⚖️</span> Sustainable Lifestyle Alternatives & Direct Impact Explainer
+          </h3>
+          <p class="text-xs text-slate-400">Toggle individual sustainable choices to calculate your personal lung dose reduction and community air improvement.</p>
+        </div>
+
+        <!-- Toggles Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Alternative 1 -->
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">🚇</span>
+                <h4 class="font-semibold text-slate-200 text-sm">Metro / Electric Transit vs. Solo Car</h4>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Replace a 15 km daily solo car commute with metro or carpooling.</p>
+              <div class="mt-2 text-[11px] text-emerald-400 font-medium">
+                Saves 8.4g direct tailpipe PM2.5 and avoids 145 µg inhaled dose.
+              </div>
+            </div>
+            <label class="switch-toggle shrink-0 mt-1">
+              <input id="alt-check-commute_shift" type="checkbox" checked>
+              <span class="slider-round"></span>
+            </label>
+          </div>
+
+          <!-- Alternative 2 -->
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">🔥</span>
+                <h4 class="font-semibold text-slate-200 text-sm">Thermal Curtains + Heat Pump vs. Open Burning</h4>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Insulate windows & use clean heat instead of open biomass/kerosene.</p>
+              <div class="mt-2 text-[11px] text-emerald-400 font-medium">
+                Eliminates 580 µg indoor PM2.5 (equivalent to avoiding 7.2 cigarettes).
+              </div>
+            </div>
+            <label class="switch-toggle shrink-0 mt-1">
+              <input id="alt-check-heating_retrofit" type="checkbox" checked>
+              <span class="slider-round"></span>
+            </label>
+          </div>
+
+          <!-- Alternative 3 -->
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">🍂</span>
+                <h4 class="font-semibold text-slate-200 text-sm">Community Bio-Compost vs. Leaf Burning</h4>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Collect and compost fallen leaves rather than setting fire to street piles.</p>
+              <div class="mt-2 text-[11px] text-emerald-400 font-medium">
+                Prevents 120g of heavy carcinogenic PM2.5 per compost pile.
+              </div>
+            </div>
+            <label class="switch-toggle shrink-0 mt-1">
+              <input id="alt-check-community_compost" type="checkbox" checked>
+              <span class="slider-round"></span>
+            </label>
+          </div>
+
+          <!-- Alternative 4 -->
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-base">🚐</span>
+                <h4 class="font-semibold text-slate-200 text-sm">School Carpool Cluster (4 Families)</h4>
+              </div>
+              <p class="text-xs text-slate-400 mt-1">Consolidate school drop-offs into 1 shared van to clear school gate idling.</p>
+              <div class="mt-2 text-[11px] text-emerald-400 font-medium">
+                Cuts school perimeter idling emissions by 75%.
+              </div>
+            </div>
+            <label class="switch-toggle shrink-0 mt-1">
+              <input id="alt-check-school_carpool" type="checkbox">
+              <span class="slider-round"></span>
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Real-Time Impact Ledger Counters -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Metric 1: Personal Inhaled Dose Spared -->
+        <div class="glass-panel p-5 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-950 border border-emerald-500/40 rounded-2xl">
+          <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">PERSONAL HEALTH PRESERVED</div>
+          <div class="text-3xl font-black text-white" id="impact-inhaled-dose">935 µg</div>
+          <div class="text-xs text-slate-300 mt-1">Inhaled Toxic PM2.5 Dose Averted Daily</div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-emerald-300 font-medium flex items-center gap-1.5">
+            <span>🚭</span> <span id="impact-cigarette-eq">~11.0 cigarettes</span> equivalent avoided today.
+          </div>
+        </div>
+
+        <!-- Metric 2: Ground Emissions Prevented -->
+        <div class="glass-panel p-5 bg-gradient-to-br from-cyan-950/40 via-slate-900 to-slate-950 border border-cyan-500/40 rounded-2xl">
+          <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1">LOCAL AIRSHED CLEANED</div>
+          <div class="text-3xl font-black text-white" id="impact-tailpipe-saved">173.4 g</div>
+          <div class="text-xs text-slate-300 mt-1">Direct Ground PM2.5 Kept Out of Your Air</div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-cyan-300 font-medium flex items-center gap-1.5">
+            <span>🌍</span> <span id="impact-co2-saved">102.0 kg</span> CO2e greenhouse gas eliminated.
+          </div>
+        </div>
+
+        <!-- Metric 3: 500-Family Community Multiplier -->
+        <div class="glass-panel p-5 bg-gradient-to-br from-purple-950/40 via-slate-900 to-slate-950 border border-purple-500/40 rounded-2xl">
+          <div class="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-1">COMMUNITY MULTIPLIER (500 HOMES)</div>
+          <div class="text-3xl font-black text-white" id="impact-community-pm25">2,601 kg</div>
+          <div class="text-xs text-slate-300 mt-1">Toxic PM2.5 Prevented Over 30 Winter Days</div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-purple-300 font-medium flex items-center gap-1.5">
+            <span>🏘️</span> <span id="impact-community-co2">1,530 tons</span> CO2e spared across neighborhood.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= TAB 5: AIR QUALITY GENAI CO-PILOT ================= -->
+    <div id="tab-pane-ai-assistant" class="tab-pane hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Conversational Co-Pilot -->
+        <div class="glass-panel p-6 bg-slate-900/80 border border-slate-800 lg:col-span-2 flex flex-col h-[650px]">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                ✨
+              </div>
+              <div>
+                <h4 class="font-bold text-white text-sm">AIR QUALITY Conversational Co-Pilot</h4>
+                <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                  <span id="api-status-pill"></span>
+                  <span>•</span>
+                  <span>Context-Aware RAG Engine</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Clear Chat -->
+            <button onclick="state.chatMessages = [state.chatMessages[0]]; renderChatHistory();" class="text-[11px] text-slate-500 hover:text-slate-300 transition">
+              Clear History
+            </button>
+          </div>
+
+          <!-- Chat Messages Area -->
+          <div id="ai-chat-history" class="flex-1 overflow-y-auto space-y-4 pr-2">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- Input Bar -->
+          <div class="mt-4 pt-3 border-t border-slate-800">
+            <div class="flex items-center gap-2">
+              <input id="ai-chat-input" type="text" placeholder="Ask anything about winter smog, mask seals, DIY purifiers, or family schedules..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+              <button id="btn-ai-send" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center gap-1.5 shrink-0">
+                <span>Send</span> <span>🚀</span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between mt-2 text-[10px] text-slate-400">
+              <span>Shift + Enter for new line • Enter to submit</span>
+              <span>Grounded in WHO, EPA & Pulmonary Science</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right 1 Col: Vision & Multimodal Diagnostic Studio -->
+        <div class="glass-panel p-6 bg-slate-900/80 border border-slate-800 space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-lg">📷</span>
+              <h4 class="font-bold text-white text-sm">GenAI Visual & Seal Inspector</h4>
+            </div>
+            <p class="text-xs text-slate-400">Inspect room window draughts, C-R box filter orientation, or kitchen range hood pressure loops.</p>
+
+            <!-- Sample Scenario Selector -->
+            <div class="mt-4 space-y-3">
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Diagnostic Scenario</label>
+                <select id="vision-sample-selector" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none">
+                  <option value="window_seal">🪟 Drafty Sliding Window (Infiltration Risk)</option>
+                  <option value="cr_box_build">🌀 Corsi-Rosenthal Box Build Verification</option>
+                  <option value="kitchen_hood">🍳 Kitchen Range Hood & Backdraft Pressure</option>
+                </select>
+              </div>
+
+              <!-- Notes / Description -->
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Physical Observations / Specs</label>
+                <textarea id="vision-notes-input" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-300 font-mono focus:border-emerald-500 focus:outline-none" placeholder="Enter measurements, visible gaps, or filter model..."></textarea>
+              </div>
+
+              <!-- Upload Custom Image -->
+              <div>
+                <label class="text-xs text-slate-400 font-semibold block mb-1">Or Upload Photo of Setup (Optional)</label>
+                <input id="vision-file-input" type="file" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+              </div>
+
+              <button id="btn-vision-analyze" class="w-full py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center justify-center gap-1.5">
+                <span>🔍</span> Run Physical Diagnostic
+              </button>
+            </div>
+          </div>
+
+          <!-- Diagnostic Results Box -->
+          <div id="vision-result-container" class="mt-4">
+            <div class="p-4 bg-slate-950 rounded-xl border border-slate-800/80 text-center text-xs text-slate-500">
+              Select a scenario or upload a photo above to run the GenAI physical leakage audit.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="mt-auto border-t border-slate-800/80 bg-slate-950/80 py-6 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-emerald-400 font-bold">AIR QUALITY</span>
+        <span>•</span>
+        <span>Empowering Families & Communities Against Urban Winter Smog</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-500">
+        <span>ASHRAE 62.2 & WHO AQG 2021 Compliant</span>
+        <span>•</span>
+        <span>Version 2.4.0</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= API KEY & GENAI ENGINE MODAL ================= -->
+  <div id="api-key-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h4 class="font-bold text-white text-base flex items-center gap-2">
+          <span>⚙️</span> GenAI Engine Settings
+        </h4>
+        <button id="btn-close-api-modal" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <p>Connect your personal <strong>Google Gemini API Key</strong> for live, unconstrained AI responses with optimized token prompt caching.</p>
+
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Gemini API Key (Stored Locally in Browser):</label>
+          <input id="api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+          <div class="font-semibold text-emerald-400">✨ Hybrid Engine Architecture:</div>
+          <p>If left blank, the app runs smoothly using the <strong>Built-in Domain Knowledge & Physics Fallback Engine</strong>, ensuring zero API quota failures and offline reliability.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="$('api-key-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white">Cancel</button>
+        <button id="btn-save-api-key" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md transition">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= HACK BLUEPRINT MODAL ================= -->
+  <div id="hack-blueprint-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h4 id="hack-modal-title" class="font-bold text-white text-base">Blueprint</h4>
+        <button onclick="closeHackModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+      </div>
+
+      <div id="hack-modal-body" class="flex-1 overflow-y-auto pr-1"></div>
+
+      <div class="flex justify-end pt-3 border-t border-slate-800">
+        <button onclick="closeHackModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition">Close Guide</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

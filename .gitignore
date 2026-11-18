@@ -1,0 +1,11 @@
+# Workarounds & OS binaries
+powershell.exe
+powershell.bat
+*.log
+
+# Dependencies
+node_modules/
+
+# OS metadata
+.DS_Store
+Thumbs.db
