@@ -1,5 +1,10 @@
 # 🌬️ AIR QUALITY - GenAI Winter Smog & Community Resilience Co-Pilot
 
+[![Live Web App](https://img.shields.io/badge/Live%20Demo-AIR%20QUALITY-10b981?style=for-the-badge&logo=googlechrome&logoColor=white)](https://umeshmalipeddi-cpu.github.io/AIR-QUALITY/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/umeshmalipeddi-cpu/AIR-QUALITY)
+
+> **Live Shareable URL:** [https://umeshmalipeddi-cpu.github.io/AIR-QUALITY/](https://umeshmalipeddi-cpu.github.io/AIR-QUALITY/)
+
 A production-grade, physics-grounded Generative AI application engineered to help urban families, sensitive individuals, and community organizers navigate severe winter smog and air pollution episodes.
 
 The application combines **real-time atmospheric telemetry** (PM2.5, PM10, diurnal ground inversion curves) with **generative intelligence** to deliver optimized daily routines, scientific indoor air quality (IAQ) hacks, DIY air purifier blueprints, and clear quantification of personal health and community emission impacts.
